@@ -1,40 +1,38 @@
 version: '3.3'
 
 services:
-  db:
+  mysql:
     image: mysql:5.7
-    volumes:
-      - ./db_data:/var/lib/mysql
-    restart: always
+    ports:
+      - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: somewordpress
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      # - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+      - ./db_data:/var/lib/mysql
+      - ./logs:/var/log/mysql
 
   wordpress:
+    build:
+      context: ./docker/wordpress
+      dockerfile: Dockerfile
+    ports:
+      - 8000:80
     depends_on:
-      - db
-    image: wordpress:latest
+      - mysql
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    working_dir: /var/www/html
     volumes:
-      - ./wp:/var/www/html
-    ports:
-      - "8000:80"
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    ports:
-      - 8080:80
-    environment:
-      PMA_HOST: db
-      PMA_USER: wordpress
-      PMA_PASSWORD: wordpress
+      - ./public:/var/www/html
 
 volumes:
-    db_data:
+  db_data:

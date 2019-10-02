@@ -1,2 +1,7 @@
 /wp
 /db_data
+/public
+/logs/*
+.env
+
+!.gitkeep
