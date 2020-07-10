@@ -1,8 +1,10 @@
 version: '3.3'
 
 services:
-  mysql:
-    image: mysql:5.7
+  database:
+    build:
+      context: ./docker/databese
+      dockerfile: Dockerfile
     ports:
       - 3306:3306
     environment:
@@ -13,7 +15,7 @@ services:
       TZ: ${TZ}
     volumes:
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      # - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
       - ./db_data:/var/lib/mysql
       - ./logs:/var/log/mysql
 
