@@ -1,9 +1,9 @@
-version: '3.3'
+version: '3'
 
 services:
-  database:
+  db:
     build:
-      context: ./docker/databese
+      context: ./docker/db
       dockerfile: Dockerfile
     ports:
       - 3306:3306
@@ -14,27 +14,36 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       TZ: ${TZ}
     volumes:
-      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
-      - ./db_data:/var/lib/mysql
-      - ./logs:/var/log/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/db/initdb.d:/docker-entrypoint-initdb.d
+      - ./db_data:/var/lib/db
+      - ./logs:/var/log/db
 
-  wordpress:
+  wp:
     build:
-      context: ./docker/wordpress
+      context: ./docker/wp
       dockerfile: Dockerfile
     ports:
       - 8000:80
     depends_on:
-      - mysql
+      - db
     environment:
-      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
     working_dir: /var/www/html
     volumes:
       - ./public:/var/www/html
+
+  wpcli:
+    image: wordpress:cli
+    command: /bin/sh -c 'sleep 10;'
+    volumes:
+      - ./public:/var/www/html
+    depends_on:
+      - db
+      - wp
 
 volumes:
   db_data:
