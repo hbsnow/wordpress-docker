@@ -36,14 +36,5 @@ services:
     volumes:
       - ./public:/var/www/html
 
-  wpcli:
-    image: wordpress:cli
-    command: /bin/sh -c 'sleep 10;'
-    volumes:
-      - ./public:/var/www/html
-    depends_on:
-      - db
-      - wp
-
 volumes:
   db_data:
